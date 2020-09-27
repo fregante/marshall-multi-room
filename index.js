@@ -1,32 +1,20 @@
 const fetch = require('node-fetch');
 const { Parser } = require('xml2js');
-const readline = require('readline');
 
-let volume;
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
-	switch (key.name) {
-		case 'c':
-			process.exit();
-		case 'up':
-			volume++;
+const keylogger = require('osx-keylogger');
+
+keylogger.listen((_, key) => {
+	switch (key) {
+		case '<69>':
+			volume = Math.min(10, volume + 1);
 			set(volume);
 			break;
-		case 'down':
+		case '<68>':
 			volume--;
 			set(volume);
 			break;
-		case 'space':
-			play();
-			break;
-		default:
-			console.log(`You pressed the "${str}" key`);
-			console.log();
-			console.log(key);
-			console.log();
 	}
-});
+}, './keymap.json');
 
 async function set(value) {
 	const url = new URL('http://192.168.1.96/fsapi/SET/netremote.sys.audio.volume/');
@@ -34,7 +22,6 @@ async function set(value) {
 	url.searchParams.set('value', value);
 	const response = await fetch(url);
 	const xml = await response.text();
-	const content = await new Parser().parseStringPromise(xml);
 }
 async function get() {
 	const url = new URL('http://192.168.1.96/fsapi/GET/netremote.sys.audio.volume/');

