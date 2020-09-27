@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "while :; do node index.js; done"
+    "start": "electron ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "electron": "^10.1.2",
     "node-fetch": "^2.6.1",
-    "osx-keylogger": "^1.0.6",
     "xml2js": "^0.4.23"
   }
 }

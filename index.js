@@ -1,19 +1,7 @@
 const fetch = require('node-fetch');
 const { Parser } = require('xml2js');
-const keylogger = require('osx-keylogger');
 
-keylogger.listen((_, key) => {
-	switch (key) {
-		case '<69>':
-			volume = Math.min(10, volume + 1);
-			call('netremote.sys.audio.volume', volume);
-			break;
-		case '<68>':
-			volume = Math.max(0, volume - 1);
-			call('netremote.sys.audio.volume', volume);
-			break;
-	}
-}, './keymap.json');
+const { app, globalShortcut } = require('electron');
 
 async function call(endpoint, value) {
 	const isSet = arguments.length > 1;
@@ -40,6 +28,25 @@ async function call(endpoint, value) {
 
 async function init() {
 	volume = await call('netremote.sys.audio.volume');
+
+	app.dock.hide();
+	await app.whenReady();
+
+	globalShortcut.register('F11', () => {
+		volume = Math.max(0, volume - 2);
+		call('netremote.sys.audio.volume', volume);
+	});
+	globalShortcut.register('F12', () => {
+		volume = Math.min(10, volume + 1);
+		call('netremote.sys.audio.volume', volume);
+	});
+	globalShortcut.register('F8', () => {
+		call('netremote.play.control', 2);
+	});
+
+	app.on('will-quit', () => {
+		globalShortcut.unregisterAll();
+	});
 }
 
 init();
