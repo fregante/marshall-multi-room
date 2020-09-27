@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
-const { Parser } = require('xml2js');
+const {Parser} = require('xml2js');
 
-const { app, globalShortcut } = require('electron');
+const {app, globalShortcut} = require('electron');
 
 async function call(endpoint, value) {
 	const isSet = arguments.length > 1;
@@ -10,7 +10,7 @@ async function call(endpoint, value) {
 	url.searchParams.set('value', value);
 	const response = await fetch(url);
 	const xml = await response.text();
-	const { fsapiResponse } = await new Parser().parseStringPromise(xml);
+	const {fsapiResponse} = await new Parser().parseStringPromise(xml);
 	if (fsapiResponse.status[0] !== 'FS_OK') {
 		console.log(fsapiResponse);
 		throw new Error(fsapiResponse.status[0]);
