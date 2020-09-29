@@ -62,7 +62,7 @@ async function init() {
 		call('netremote.sys.audio.volume', volume);
 	});
 	globalShortcut.register('F12', () => {
-		volume = Math.min(10, volume + 1);
+		volume = Math.min(32, volume + 1);
 		call('netremote.sys.audio.volume', volume);
 	});
 	globalShortcut.register('F8', () => {
