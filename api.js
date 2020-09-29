@@ -1,37 +1,23 @@
 const mem = require('mem');
-const arp = require('@network-utils/arp-lookup');
+const find = require('local-devices');
+const pAny = require('p-any');
 const fetch = require('node-fetch');
-const pRetry = require('p-retry');
 const {Parser} = require('xml2js');
+const AbortController = require('abort-controller');
 
 const getIP = mem(async () => {
-	console.log('will get IP');
-	const table = await arp.getTable();
-	const device = table.find(({vendor}) => vendor.startsWith('Frontier'));
-	console.log(device?.ip);
-	return device?.ip;
+	const devices = await find();
+	const controller = new AbortController();
+
+	const ip = await pAny(devices.map(async ({ip}) => {
+		await call({ip, signal: controller.signal}, 'sys.info.friendlyname');
+		return ip;
+	}));
+	controller.abort();
+	return ip;
 });
 
-async function request(url) {
-	return pRetry(() => fetch(url), {
-		onFailedAttempt: async () => {
-			console.log('will retry');
-			mem.clear(getIP);
-			url.host = await getIP();
-		}
-	});
-}
-
-async function call(endpoint, value) {
-	const isSet = arguments.length > 1;
-	console.log('will call');
-	const url = new URL(`http://${await getIP()}/fsapi/${isSet ? 'SET' : 'GET'}/${endpoint}/`);
-	url.searchParams.set('pin', 1234);
-	url.searchParams.set('value', value);
-	console.log('will request');
-	const response = await request(url);
-	console.log('got it');
-	const xml = await response.text();
+async function parseResponse(xml) {
 	const {fsapiResponse} = await new Parser().parseStringPromise(xml);
 	if (fsapiResponse.status[0] !== 'FS_OK') {
 		console.log(fsapiResponse);
@@ -39,14 +25,24 @@ async function call(endpoint, value) {
 	}
 
 	const returned = fsapiResponse.value;
-	if (!isSet && returned && returned.length > 0) {
+	if (returned && returned.length > 0) {
 		if (returned[0].u8) {
 			return Number(returned[0].u8[0]);
 		}
 
-		console.log(returned);
-		return returned[0];
+		return returned[0].c8_array[0];
 	}
+}
+
+async function call({ip, signal}, endpoint, value) {
+	const isSet = arguments.length > 2;
+	const url = new URL(`http://${ip}/fsapi/${isSet ? 'SET' : 'GET'}/netremote.${endpoint}/`);
+	url.searchParams.set('pin', 1234);
+	url.searchParams.set('value', value);
+	console.log(endpoint, value);
+	const response = await fetch(url, {signal});
+	const text = await response.text();
+	return parseResponse(text);
 }
 
 exports.getIP = getIP;
