@@ -1,14 +1,38 @@
 const fetch = require('node-fetch');
 const {Parser} = require('xml2js');
+const arp = require('@network-utils/arp-lookup');
 
 const {app, globalShortcut} = require('electron');
+const mem = require('mem');
+const pRetry = require('p-retry');
+
+const getIP = mem(async () => {
+	console.log('will get IP');
+	const table = await arp.getTable();
+	const device = table.find(({vendor}) => vendor.startsWith('Frontier'));
+	console.log(device?.ip);
+	return device?.ip;
+});
+
+async function request(url) {
+	return pRetry(() => fetch(url), {
+		onFailedAttempt: async () => {
+			console.log('will retry');
+			mem.clear(getIP);
+			url.host = await getIP();
+		},
+	});
+}
 
 async function call(endpoint, value) {
 	const isSet = arguments.length > 1;
-	const url = new URL(`http://192.168.1.96/fsapi/${isSet ? 'SET' : 'GET'}/${endpoint}/`);
+	console.log('will call');
+	const url = new URL(`http://${await getIP()}/fsapi/${isSet ? 'SET' : 'GET'}/${endpoint}/`);
 	url.searchParams.set('pin', 1234);
 	url.searchParams.set('value', value);
-	const response = await fetch(url);
+	console.log('will request');
+	const response = await request(url);
+	console.log('got it');
 	const xml = await response.text();
 	const {fsapiResponse} = await new Parser().parseStringPromise(xml);
 	if (fsapiResponse.status[0] !== 'FS_OK') {
@@ -27,6 +51,7 @@ async function call(endpoint, value) {
 }
 
 async function init() {
+	await getIP();
 	volume = await call('netremote.sys.audio.volume');
 
 	app.dock.hide();
