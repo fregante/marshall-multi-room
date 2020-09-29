@@ -1,10 +1,11 @@
-const fetch = require('node-fetch');
-const {Parser} = require('xml2js');
-const arp = require('@network-utils/arp-lookup');
-
-const {app, globalShortcut} = require('electron');
 const mem = require('mem');
+const arp = require('@network-utils/arp-lookup');
+const fetch = require('node-fetch');
 const pRetry = require('p-retry');
+const {Parser} = require('xml2js');
+const {app, globalShortcut} = require('electron');
+
+let volume;
 
 const getIP = mem(async () => {
 	console.log('will get IP');
@@ -20,7 +21,7 @@ async function request(url) {
 			console.log('will retry');
 			mem.clear(getIP);
 			url.host = await getIP();
-		},
+		}
 	});
 }
 
@@ -45,6 +46,7 @@ async function call(endpoint, value) {
 		if (returned[0].u8) {
 			return Number(returned[0].u8[0]);
 		}
+
 		console.log(returned);
 		return returned[0];
 	}
