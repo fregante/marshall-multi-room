@@ -16,8 +16,9 @@
 	"author": "",
 	"main": "index.js",
 	"scripts": {
+		"build": "electron-builder --macos dir",
 		"start": "electron .",
-		"build": "electron-builder --macos dir"
+		"test": "xo"
 	},
 	"dependencies": {
 		"@network-utils/arp-lookup": "^1.3.4",
