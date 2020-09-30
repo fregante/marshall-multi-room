@@ -5,10 +5,20 @@ let volume;
 
 async function init() {
 	app.dock.hide();
-	const ip = await getIP();
-	volume = await call({ip}, 'sys.audio.volume');
+	// const ip = await getIP();
+	// volume = await call({ip}, 'sys.audio.volume');
 
 	await app.whenReady();
+	const { BrowserWindow } = require('electron')
+	let win = new BrowserWindow({ width: 800, height: 600, frame: false, transparent: true, show: false, alwaysOnTop: true})
+	win.center();
+win.once('ready-to-show', () => {
+	win.show();
+	win.webContents.insertText('#############################')
+})
+	win.setIgnoreMouseEvents(true)
+	await win.loadFile('overlay.html')
+	return;
 
 	globalShortcut.register('F11', () => {
 		volume = Math.max(0, volume - 2);
