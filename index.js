@@ -21,6 +21,11 @@ function notifyError(error) {
 
 async function init() {
 	app.setActivationPolicy('accessory');
+	if (!app.isInApplicationsFolder()) {
+		app.moveToApplicationsFolder();
+		return;
+	}
+
 	const ip = await pTimeout(getIP(), 5000, 'No device could be found');
 	volume = await call({ip}, 'sys.audio.volume');
 
