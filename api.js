@@ -41,8 +41,13 @@ async function call({ip, signal}, endpoint, value) {
 	const isSet = arguments.length > 2;
 	const url = new URL(`http://${ip}/fsapi/${isSet ? 'SET' : 'GET'}/netremote.${endpoint}/`);
 	url.searchParams.set('pin', 1234);
-	url.searchParams.set('value', value);
-	console.log(endpoint, value);
+	if (typeof value === 'undefined') {
+		console.log(endpoint);
+	} else {
+		url.searchParams.set('value', value);
+		console.log(endpoint, value);
+	}
+
 	const response = await fetch(url, {signal});
 	const text = await response.text();
 	return parseResponse(text);
