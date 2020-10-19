@@ -1,21 +1,24 @@
-const mem = require('mem');
-const find = require('local-devices');
-const pAny = require('p-any');
+const mdns = require('mdns');
 const fetch = require('node-fetch');
 const {Parser} = require('xml2js');
 const AbortController = require('abort-controller');
 
-const getIP = mem(async () => {
-	const devices = await find();
-	const controller = new AbortController();
-
-	const ip = await pAny(devices.map(async ({ip}) => {
-		await call({ip, signal: controller.signal}, 'sys.info.friendlyname');
-		return ip;
-	}));
-	controller.abort();
-	return ip;
-});
+function getIP() {
+	return new Promise(resolve => {
+		const controller = new AbortController();
+		const browser = mdns.createBrowser(mdns.tcp('http'));
+		browser.on('serviceUp', async service => {
+			await call({
+				ip: service.host,
+				signal: controller.signal
+			}, 'sys.info.friendlyname');
+			controller.abort();
+			browser.stop();
+			resolve(service.host);
+		});
+		browser.start();
+	});
+}
 
 async function parseResponse(xml) {
 	const {fsapiResponse} = await new Parser().parseStringPromise(xml);
