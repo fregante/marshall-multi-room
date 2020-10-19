@@ -1,11 +1,12 @@
 const {app, globalShortcut} = require('electron');
 const {getIP, call} = require('./api');
+const pTimeout = require('p-timeout');
 
 let volume;
 
 async function init() {
 	app.dock.hide();
-	const ip = await getIP();
+	const ip = await pTimeout(getIP(), 5000, 'No device could be found');
 	volume = await call({ip}, 'sys.audio.volume');
 
 	await app.whenReady();
