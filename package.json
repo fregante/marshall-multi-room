@@ -1,19 +1,7 @@
 {
 	"private": true,
-	"name": "controller-for-marshall",
-	"version": "0.0.1",
-	"description": "POC: Control a Marshall Acton Multi Room WiFi speaker. Not an usable module yet.",
-	"keywords": [],
-	"homepage": "https://github.com/fregante/marshall-multi-room#readme",
-	"bugs": {
-		"url": "https://github.com/fregante/marshall-multi-room/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/fregante/marshall-multi-room.git"
-	},
-	"license": "ISC",
-	"author": "",
+	"name": "Marshallmote",
+	"version": "1.1.0",
 	"main": "index.js",
 	"scripts": {
 		"build": "electron-builder --macos dir",
@@ -22,7 +10,6 @@
 	},
 	"dependencies": {
 		"abort-controller": "^3.0.0",
-		"local-devices": "^3.1.0",
 		"mdns": "^2.5.1",
 		"node-fetch": "^2.6.1",
 		"p-timeout": "^3.2.0",
